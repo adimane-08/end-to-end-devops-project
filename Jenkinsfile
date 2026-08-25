@@ -24,13 +24,14 @@ pipeline {
                     sh './mvnw test'
                 }
             }
-        stage('Docker Build') {
-          steps {
-            dir('application') {
-              sh 'docker build -t devops-app:v2 .'
         }
-    }
-}
+
+        stage('Docker Build') {
+            steps {
+                dir('application') {
+                    sh 'docker build -t devops-app:v2 .'
+                }
+            }
         }
     }
 }
