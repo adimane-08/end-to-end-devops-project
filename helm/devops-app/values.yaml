@@ -1,0 +1,31 @@
+replicaCount: 2
+
+image:
+  repository: devops-app
+  pullPolicy: IfNotPresent
+  tag: "v1"
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8080
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+livenessProbe:
+  path: /actuator/health/liveness
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  failureThreshold: 3
+
+readinessProbe:
+  path: /actuator/health/readiness
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  failureThreshold: 3
