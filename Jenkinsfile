@@ -15,7 +15,7 @@ pipeline {
           }
         }
       }
-    stage('test')
+    stage('test') {
       steps {
         dir('application') {
             bat '.\\mvnw.cmd test'
@@ -23,6 +23,7 @@ pipeline {
         }
       }
     }
-  }
+}
+  
 
   
