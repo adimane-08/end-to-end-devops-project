@@ -1,28 +1,29 @@
 pipeline {
-  agent any
-  stages {
-    
-    stage('checkout') {
-      steps { 
-          checkout scm
-          }
-     }
+    agent any
 
-    stage('build') {
-      steps {
-        dir('application') {
-          bat '.\\mvnw.cmd clean package'
-          }
+    stages {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
         }
-      }
-    stage('test')
-      steps {
-        dir('application') {
-            bat '.\\mvnw.cmd test'
-          }
+
+        stage('Build') {
+            steps {
+                dir('application') {
+                    sh 'chmod +x mvnw'
+                    sh './mvnw clean package'
+                }
+            }
         }
-      }
+
+        stage('Test') {
+            steps {
+                dir('application') {
+                    sh './mvnw test'
+                }
+            }
+        }
     }
-  }
-
-  
+}
