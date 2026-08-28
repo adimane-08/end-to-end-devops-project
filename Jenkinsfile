@@ -60,7 +60,8 @@ pipeline {
                 sh '''
                     helm upgrade --install devops-app-dev helm/devops-app \
                     -f helm/devops-app/values-dev.yaml \
-                    --namespace dev
+                    --namespace dev \
+                    --kube-insecure-skip-tls-verify
                 '''
             }
         }
@@ -70,7 +71,8 @@ pipeline {
                 sh '''
                     helm upgrade --install devops-app-qa helm/devops-app \
                     -f helm/devops-app/values-qa.yaml \
-                    --namespace qa
+                    --namespace qa \
+                    --kube-insecure-skip-tls-verify
                 '''
             }
         }
@@ -80,7 +82,8 @@ pipeline {
                 sh '''
                     helm upgrade --install devops-app-prod helm/devops-app \
                     -f helm/devops-app/values-prod.yaml \
-                    --namespace prod
+                    --namespace prod \
+                    --kube-insecure-skip-tls-verify
                 '''
             }
         }
