@@ -1,3 +1,4 @@
+```groovy
 pipeline {
     agent any
 
@@ -29,7 +30,9 @@ pipeline {
         stage('Docker Build') {
             steps {
                 dir('application') {
-                    sh 'docker build -t devops-app:v2 .'
+                    sh '''
+                        docker build -t devops-app:${BUILD_NUMBER} .
+                    '''
                 }
             }
         }
@@ -45,11 +48,11 @@ pipeline {
                         echo "$DOCKERHUB_TOKEN" | docker login \
                         -u "$DOCKERHUB_USERNAME" --password-stdin
 
-                        docker tag devops-app:v2 \
-                        $DOCKERHUB_USERNAME/devops-app:v2
+                        docker tag devops-app:${BUILD_NUMBER} \
+                        $DOCKERHUB_USERNAME/devops-app:${BUILD_NUMBER}
 
                         docker push \
-                        $DOCKERHUB_USERNAME/devops-app:v2
+                        $DOCKERHUB_USERNAME/devops-app:${BUILD_NUMBER}
                     '''
                 }
             }
@@ -60,6 +63,7 @@ pipeline {
                 sh '''
                     helm upgrade --install devops-app-dev helm/devops-app \
                     -f helm/devops-app/values-dev.yaml \
+                    --set image.tag=${BUILD_NUMBER} \
                     --namespace dev \
                     --kube-insecure-skip-tls-verify
                 '''
@@ -71,6 +75,7 @@ pipeline {
                 sh '''
                     helm upgrade --install devops-app-qa helm/devops-app \
                     -f helm/devops-app/values-qa.yaml \
+                    --set image.tag=${BUILD_NUMBER} \
                     --namespace qa \
                     --kube-insecure-skip-tls-verify
                 '''
@@ -82,6 +87,7 @@ pipeline {
                 sh '''
                     helm upgrade --install devops-app-prod helm/devops-app \
                     -f helm/devops-app/values-prod.yaml \
+                    --set image.tag=${BUILD_NUMBER} \
                     --namespace prod \
                     --kube-insecure-skip-tls-verify
                 '''
@@ -89,3 +95,4 @@ pipeline {
         }
     }
 }
+```
