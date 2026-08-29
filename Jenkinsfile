@@ -68,6 +68,11 @@ pipeline {
                 '''
             }
         }
+	stage('Approve QA') {
+            steps {
+                input message: 'DEV deployment completed. Deploy to QA?', ok: ' 
+             }
+         }
 
         stage('Deploy QA') {
             steps {
@@ -80,6 +85,12 @@ pipeline {
                 '''
             }
         }
+        stage('Approve PROD') {
+            steps {
+                input message: 'QA deployment completed. Deploy to PROD?', ok: ' 
+             }
+         }
+
 
         stage('Deploy PROD') {
             steps {
