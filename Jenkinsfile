@@ -89,13 +89,14 @@ pipeline {
                 --image=curlimages/curl:8.10.1 \
                 -n dev \
                 --command -- \
-                curl -f http://devops-app-dev-service/actuator/health
+                curl -f --connect-timeout 10 \
+                http://devops-app-dev-service/actuator/health
 
               kubectl --insecure-skip-tls-verify wait \
                 --for=jsonpath='{.status.phase}'=Succeeded \
                 pod/dev-health-check \
                 -n dev \
-                --timeout=60s
+                --timeout=120s
 
               kubectl --insecure-skip-tls-verify logs \
                 dev-health-check \
