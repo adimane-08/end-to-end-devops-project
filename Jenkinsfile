@@ -166,6 +166,49 @@ pipeline {
         '''
     }
 }
+        stage('QA Health Check') {
+         steps {
+          sh '''
+            echo "Waiting for QA rollout..."
+
+            kubectl --insecure-skip-tls-verify rollout status \
+                deployment/devops-app-qa \
+                -n qa \
+                --timeout=120s
+
+            echo "Checking QA application health..."
+
+            kubectl --insecure-skip-tls-verify delete pod qa-health-check \
+                -n qa \
+                --ignore-not-found
+
+            kubectl --insecure-skip-tls-verify run qa-health-check \
+                --restart=Never \
+                --image=curlimages/curl:8.10.1 \
+                -n qa \
+                --command -- \
+                curl -f --connect-timeout 10 \
+                http://devops-app-qa-service:80/actuator/health
+
+            kubectl --insecure-skip-tls-verify wait \
+                --for=jsonpath='{.status.phase}'=Succeeded \
+                pod/qa-health-check \
+                -n qa \
+                --timeout=120s
+
+            echo "QA health check result:"
+
+            kubectl --insecure-skip-tls-verify logs \
+                qa-health-check \
+                -n qa
+
+            kubectl --insecure-skip-tls-verify delete pod \
+                qa-health-check \
+                -n qa \
+                --ignore-not-found
+        '''
+    }
+}
         stage('Approve PROD') {
          steps {
           input message: 'QA deployment completed. Deploy to PROD?', ok: 'Deploy PROD'
