@@ -184,5 +184,48 @@ pipeline {
                 '''
             }
         }
+        stage('PROD Health Check') {
+          steps {
+           sh '''
+            echo "Waiting for PROD rollout..."
+
+            kubectl --insecure-skip-tls-verify rollout status \
+                deployment/devops-app-prod \
+                -n prod \
+                --timeout=300s
+
+            echo "Checking PROD application health..."
+
+            kubectl --insecure-skip-tls-verify delete pod prod-health-check \
+                -n prod \
+                --ignore-not-found
+
+            kubectl --insecure-skip-tls-verify run prod-health-check \
+                --restart=Never \
+                --image=curlimages/curl:8.10.1 \
+                -n prod \
+                --command -- \
+                curl -f --connect-timeout 10 \
+                http://devops-app-prod-service:80/actuator/health
+
+            kubectl --insecure-skip-tls-verify wait \
+                --for=jsonpath='{.status.phase}'=Succeeded \
+                pod/prod-health-check \
+                -n prod \
+                --timeout=120s
+
+            echo "PROD health check result:"
+
+            kubectl --insecure-skip-tls-verify logs \
+                prod-health-check \
+                -n prod
+
+            kubectl --insecure-skip-tls-verify delete pod \
+                prod-health-check \
+                -n prod \
+                --ignore-not-found
+        '''
+    }
+}
     }
 }
