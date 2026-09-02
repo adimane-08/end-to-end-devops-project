@@ -210,7 +210,7 @@ pipeline {
                         -n prod \
                         --command -- \
                         curl -f --connect-timeout 10 \
-                        http://devops-app-prod-service:80/actuator/health
+                        http://devops-app-prod-service:80/actuator/health/THIS-WILL-FAIL
 
                     kubectl --insecure-skip-tls-verify wait \
                         --for=jsonpath='{.status.phase}'=Succeeded \
