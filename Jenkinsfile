@@ -224,6 +224,15 @@ pipeline {
                 prod-health-check \
                 -n prod \
                 --ignore-not-found
+            echo "PROD deployment and health check are successful."
+            echo "Updating Last Known Good version to build ${BUILD_NUMBER}..."
+
+            mkdir -p /var/jenkins_home/lkg
+ 
+            echo "${BUILD_NUMBER}" > /var/jenkins_home/lkg/prod_last_known_good.txt
+
+            echo "Last Known Good version:"
+            cat /var/jenkins_home/lkg/prod_last_known_good.txt
         '''
     }
 }

@@ -25,7 +25,15 @@ spec:
 
           ports:
             - containerPort: 8080
-
+          
+          startupProbe:
+            httpGet:
+              path: {{ .Values.livenessProbe.path }}
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 15
           livenessProbe:
             httpGet:
               path: {{ .Values.livenessProbe.path }}
