@@ -167,14 +167,15 @@ pipeline {
     }
 }
        
-        stage('Approve PROD') {
-         steps {
-          input message: 'QA deployment completed. Deploy to PROD?', ok: 'Deploy PROD'
+stage('Approve PROD') {
+    steps {
+        input message: 'QA deployment completed. Deploy to PROD?', ok: 'Deploy PROD'
     }
 }
-        stage('PROD Deployment') {
-         steps {
-          script {
+
+stage('PROD Deployment') {
+    steps {
+        script {
             try {
                 echo "======================================"
                 echo "Deploying build ${BUILD_NUMBER} to PROD"
@@ -276,11 +277,13 @@ pipeline {
 
                     echo "Checking rolled-back application health..."
 
-                    kubectl --insecure-skip-tls-verify delete pod prod-rollback-health-check \
+                    kubectl --insecure-skip-tls-verify delete pod \
+                        prod-rollback-health-check \
                         -n prod \
                         --ignore-not-found
 
-                    kubectl --insecure-skip-tls-verify run prod-rollback-health-check \
+                    kubectl --insecure-skip-tls-verify run \
+                        prod-rollback-health-check \
                         --restart=Never \
                         --image=curlimages/curl:8.10.1 \
                         -n prod \
@@ -288,11 +291,38 @@ pipeline {
                         curl -f --connect-timeout 10 \
                         http://devops-app-prod-service:80/actuator/health
 
-                    kubectl --insecure-skip-tls-verify wait \
+                    echo "Waiting for rollback health check..."
+
+                    if kubectl --insecure-skip-tls-verify wait \
                         --for=jsonpath='{.status.phase}'=Succeeded \
                         pod/prod-rollback-health-check \
                         -n prod \
-                        --timeout=120s
+                        --timeout=30s
+                    then
+                        echo "Rollback health check completed successfully."
+                    else
+                        echo "ERROR: Rollback health check failed or timed out."
+
+                        echo "Rollback health check pod status:"
+
+                        kubectl --insecure-skip-tls-verify get pod \
+                            prod-rollback-health-check \
+                            -n prod
+
+                        echo "Rollback health check logs:"
+
+                        kubectl --insecure-skip-tls-verify logs \
+                            prod-rollback-health-check \
+                            -n prod
+
+                        kubectl --insecure-skip-tls-verify delete pod \
+                            prod-rollback-health-check \
+                            -n prod \
+                            --ignore-not-found
+
+                        echo "ERROR: PROD rollback could not be health verified."
+                        exit 1
+                    fi
 
                     echo "Rollback health check result:"
 
@@ -318,6 +348,7 @@ pipeline {
         }
     }
 }
+
 
            }
 }
