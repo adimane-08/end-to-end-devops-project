@@ -76,7 +76,7 @@ pipeline {
               kubectl --insecure-skip-tls-verify rollout status \
                 deployment/devops-app-dev \
                 -n dev \
-                --timeout=120s
+                --timeout=300s
 
               echo "Checking DEV application health..."
 
