@@ -211,8 +211,7 @@ stage('PROD Deployment') {
                         -n prod \
                         --command -- \
                         curl -f --connect-timeout 10 \
-                        http://devops-app-prod-service:80/actuator/health/THIS-WILL-FAIL
-
+                        http://devops-app-prod-service:80/actuator/health
                     kubectl --insecure-skip-tls-verify wait \
                         --for=jsonpath='{.status.phase}'=Succeeded \
                         pod/prod-health-check \
